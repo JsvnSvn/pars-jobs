@@ -1,21 +1,8 @@
 import requests
 from bs4 import BeautifulSoup as bs
-import csv
-from random import choice
-
-
-def write_csv(jobs):
-    with open('hh.csv', 'a', newline='') as f:
-        writer = csv.writer(f)
-        writer.writerow(('Название вакансии', 'Зарплата', 'Компания', 'Город', 'Описание', 'Требования', 'Ссылка'))
-        for job in jobs:
-            writer.writerow((job['title'],
-                             job['salary'],
-                             job['company'],
-                             job['city'],
-                             job['description'],
-                             job['requirements'],
-                             job['url']))
+from func import write_csv
+from attrs import HeadHunter
+import utils
 
 
 def get_hh(base_url, headers=None, proxy=None):
@@ -25,11 +12,10 @@ def get_hh(base_url, headers=None, proxy=None):
     session = requests.Session()
     r = session.get(base_url, headers=headers, proxies=proxy)
     if r.status_code == 200:
-        # r = session.get(base_url, headers=headers, proxies=proxy)
         soup = bs(r.content, 'html.parser')
-        divs = soup.find_all('div', attrs={'class': 'vacancy-serp-item'})
+        divs = soup.find_all('div', attrs={'class': HeadHunter.HH_DIVS})
         try:
-            pagination = soup.find_all('a', attrs={'data-qa': 'pager-page'})
+            pagination = soup.find_all('a', attrs={'data-qa': HeadHunter.HH_PAGINATION})
             count = int(pagination[-1].text)
             for i in range(count):
                 url = f'https://hh.ru/search/vacancy?L_is_autosearch=false&clusters=true&enable_snippets=true&text=QA&page={i}'
@@ -39,43 +25,40 @@ def get_hh(base_url, headers=None, proxy=None):
             pass
 
         for url in urls:
-            # r = session.get(base_url, headers=headers, proxies=proxy)
-            # soup = bs(r.content, 'html.parser')
-            # divs = soup.find_all('div', attrs={'class': 'vacancy-serp-item'})
             for div in divs:
                 try:
-                    title = div.find('a', attrs={'data-qa': 'vacancy-serp__vacancy-title'}).text
+                    title = div.find('a', attrs={'data-qa': HeadHunter.HH_TITLE}).text
                 except:
                     title = ''
 
                 try:
-                    company = div.find('a', attrs={'data-qa': 'vacancy-serp__vacancy-employer'}).text
+                    company = div.find('a', attrs={'data-qa': HeadHunter.HH_COMPANY}).text
                 except:
                     company = ''
 
                 try:
-                    city = div.find('span', attrs={'data-qa': 'vacancy-serp__vacancy-address'}).text
+                    city = div.find('span', attrs={'data-qa': HeadHunter.HH_CITY}).text
                 except:
                     city = ''
 
                 try:
-                    salary = div.find('div', attrs={'data-qa': 'vacancy-serp__vacancy-compensation'}).text
+                    salary = div.find('div', attrs={'data-qa': HeadHunter.HH_SALARY}).text
                 except:
                     salary = 'Ленивые сволочи'
 
                 try:
-                    url = div.find('a', attrs={'data-qa': 'vacancy-serp__vacancy-title'})['href']
+                    url = div.find('a', attrs={'data-qa': HeadHunter.HH_URL})['href']
                 except:
                     url = ''
 
                 try:
                     description = div.find('div',
-                                           attrs={'data-qa': 'vacancy-serp__vacancy_snippet_responsibility'}).text
+                                           attrs={'data-qa': HeadHunter.HH_DESCRIPTION}).text
                 except:
                     description = ''
 
                 try:
-                    requirements = div.find('div', attrs={'data-qa': 'vacancy-serp__vacancy_snippet_requirement'}).text
+                    requirements = div.find('div', attrs={'data-qa': HeadHunter.HH_REQUIREMENTS}).text
                 except:
                     requirements = ''
 
@@ -94,12 +77,11 @@ def get_hh(base_url, headers=None, proxy=None):
 
 def main():
     base_url = 'https://hh.ru/search/vacancy?L_is_autosearch=false&clusters=true&enable_snippets=true&text=QA&page=0'
-    useragents = open('useragents.txt').read().split('\n')
-    proxies = open('proxies.txt').read().split('\n')
-    proxy = {'http': 'http://' + choice(proxies)}
-    headers = {'User-Agent': str(choice(useragents))}
+    proxy = utils.proxy
+    headers = utils.headers
     jobs = get_hh(base_url, headers, proxy)
     write_csv(jobs)
+
 
 if __name__ == '__main__':
     main()

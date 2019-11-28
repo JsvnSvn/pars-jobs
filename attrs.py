@@ -1,0 +1,10 @@
+class HeadHunter:
+    HH_DIVS = 'vacancy-serp-item'
+    HH_PAGINATION = 'pager-page'
+    HH_TITLE = 'vacancy-serp__vacancy-title'
+    HH_COMPANY = 'vacancy-serp__vacancy-employer'
+    HH_CITY = 'vacancy-serp__vacancy-address'
+    HH_SALARY = 'vacancy-serp__vacancy-compensation'
+    HH_URL = 'vacancy-serp__vacancy-title'
+    HH_DESCRIPTION = 'vacancy-serp__vacancy_snippet_responsibility'
+    HH_REQUIREMENTS = 'vacancy-serp__vacancy_snippet_requirement'
