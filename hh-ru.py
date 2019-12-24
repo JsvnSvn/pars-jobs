@@ -18,7 +18,7 @@ def get_hh(base_url, headers=None, proxy=None):
             pagination = soup.find_all('a', attrs={'data-qa': HeadHunter.HH_PAGINATION})
             count = int(pagination[-1].text)
             for i in range(count):
-                url = f'https://hh.ru/search/vacancy?L_is_autosearch=false&clusters=true&enable_snippets=true&text=QA&page={i}'
+                url = f'{base_url}{i}'
                 if url not in urls:
                     urls.append(url)
         except:
@@ -76,11 +76,13 @@ def get_hh(base_url, headers=None, proxy=None):
 
 
 def main():
-    base_url = 'https://hh.ru/search/vacancy?L_is_autosearch=false&clusters=true&enable_snippets=true&text=QA&page=0'
-    proxy = utils.proxy
-    headers = utils.headers
-    jobs = get_hh(base_url, headers, proxy)
-    write_csv(jobs)
+    jobs_name = ['QA', 'Qa+engineer', 'Qa+tester', 'Qa+automation', 'Qa+junior', 'Qa+тестировщик']
+    for i in jobs_name:
+        base_url = f'https://hh.ru/search/vacancy?L_is_autosearch=false&clusters=true&enable_snippets=true&text={i}&page=0'
+        proxy = utils.proxy
+        headers = utils.headers
+        jobs = get_hh(base_url, headers, proxy)
+        write_csv(jobs)
 
 
 if __name__ == '__main__':
